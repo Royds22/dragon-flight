@@ -1,1 +1,141 @@
 
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dragon Flight</title>
+
+<style>
+body{
+    margin:0;
+    overflow:hidden;
+    background:linear-gradient(#64b5ff,#d7f2ff);
+    font-family:Arial;
+}
+
+#score{
+    position:absolute;
+    top:20px;
+    left:20px;
+    color:white;
+    font-size:32px;
+    font-weight:bold;
+}
+
+canvas{
+    display:block;
+}
+</style>
+</head>
+
+<body>
+
+<div id="score">0</div>
+
+<canvas id="game"></canvas>
+
+<script>
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+function resize(){
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener("resize",resize);
+
+let dragonY = canvas.height/2;
+let velocity = 0;
+let score = 0;
+
+let obstacles=[];
+
+function flap(){
+    velocity=-8;
+}
+
+document.addEventListener("click",flap);
+document.addEventListener("touchstart",flap);
+
+setInterval(()=>{
+    obstacles.push({
+        x:canvas.width,
+        gapY:100+Math.random()*(canvas.height-300),
+        passed:false
+    });
+},1800);
+
+function drawDragon(){
+
+    ctx.fillStyle="orange";
+
+    ctx.beginPath();
+    ctx.arc(100,dragonY,25,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.fillStyle="red";
+
+    ctx.beginPath();
+    ctx.moveTo(80,dragonY);
+    ctx.lineTo(50,dragonY-15);
+    ctx.lineTo(50,dragonY+15);
+    ctx.fill();
+
+}
+
+function gameLoop(){
+
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    velocity +=0.4;
+    dragonY += velocity;
+
+    drawDragon();
+
+    obstacles.forEach(o=>{
+
+        o.x -=4;
+
+        ctx.fillStyle="#6b4a20";
+
+        ctx.fillRect(o.x,0,50,o.gapY);
+
+        ctx.fillRect(
+            o.x,
+            o.gapY+180,
+            50,
+            canvas.height
+        );
+
+        if(
+            125>o.x &&
+            75<o.x+50
+        ){
+            if(
+                dragonY-25<o.gapY ||
+                dragonY+25>o.gapY+180
+            ){
+                alert("Game Over");
+                location.reload();
+            }
+        }
+
+        if(!o.passed && o.x<100){
+            o.passed=true;
+            score++;
+            document.getElementById("score").innerText=score;
+        }
+
+    });
+
+    requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+
+</script>
+
+</body>
+</html>
